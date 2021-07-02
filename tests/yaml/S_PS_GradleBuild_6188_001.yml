@@ -36,7 +36,7 @@ pipelines:
           resolverRepo: "test-automation-gradle-remote"
           deployerRepo: "test-automation-gradle-local"
           sourceLocation: "tests/gradle-example-minimal"
-          gradleCommand: "clean artifactoryPublish --stacktrace --debug"
+          gradleCommand: "clean artifactoryPublish"
           usesPlugin: true
 
       - name: S_PS_GradleBuild_6188_001_2
