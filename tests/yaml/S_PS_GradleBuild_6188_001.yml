@@ -35,8 +35,8 @@ pipelines:
           autoPublishBuildInfo: true
           resolverRepo: "test-automation-gradle-remote"
           deployerRepo: "test-automation-gradle-local"
-          sourceLocation: "tests/gradle"
-          gradleCommand: "hello"
+          sourceLocation: "tests/gradle-example-minimal"
+          gradleCommand: "clean artifactoryPublish"
 
       - name: S_PS_GradleBuild_6188_001_2
         type: PowerShell
