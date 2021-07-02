@@ -37,6 +37,7 @@ pipelines:
           deployerRepo: "test-automation-gradle-local"
           sourceLocation: "tests/gradle-example-minimal"
           gradleCommand: "clean artifactoryPublish --stacktrace --debug"
+          usesPlugin: true
 
       - name: S_PS_GradleBuild_6188_001_2
         type: PowerShell
