@@ -21,6 +21,7 @@ pipelines:
           idle_name: "idle-hbgroleswitch-ps-2"
           live_name: "live-hbgroleswitch-ps-2"
           k8s_namespace: {{ .Values.Kubernetes.namespace }}
+          unique_id:
     steps:
       - name: S_PS_HBGRoleSwitch_5978_0002_1
         type: HelmBlueGreenDeploy
@@ -31,22 +32,19 @@ pipelines:
             - name: S_PS_HBGRoleSwitch_5978_0002_git_resource
           chartPath: tests/core/helmbluegreen/simplehelm
           namespace: ${k8s_namespace}
-          blueReleaseName: ${blue_release_name}-${run_id}
-          greenReleaseName: ${green_release_name}-${run_id}
+          blueReleaseName: ${blue_release_name}-${run_unique_id}
+          greenReleaseName: ${green_release_name}-${run_unique_id}
           roleServices:
-            - blueReferenceName: ${blue_release_name}-${run_id}-simplehelm
-              greenReferenceName: ${green_release_name}-${run_id}-simplehelm
-              idleName: ${idle_name}-${run_id}
-              liveName: ${live_name}-${run_id}
+            - blueReferenceName: ${blue_release_name}-${run_unique_id}-simplehelm
+              greenReferenceName: ${green_release_name}-${run_unique_id}-simplehelm
+              idleName: ${idle_name}-${run_unique_id}
+              liveName: ${live_name}-${run_unique_id}
         execution:
+          onStart:
+            - if ( "${unique_id}" -ne "" ) { add_run_variables run_unique_id="${unique_id}" } else { add_run_variables run_unique_id="${run_id}" }
           onSuccess:
-            - helm3 status ${blue_release_name}-${run_id}
-            - kubectl get service ${idle_name}-${run_id}
-          onFailure:
-            - helm3 delete ${blue_release_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - helm3 delete ${green_release_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - kubectl delete service ${idle_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - kubectl delete service ${live_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
+            - helm3 status ${blue_release_name}-${run_unique_id}
+            - kubectl get service ${idle_name}-${run_unique_id}
 
       - name: S_PS_HBGRoleSwitch_5978_0002_2
         type: HelmBlueGreenRoleSwitch
@@ -58,13 +56,7 @@ pipelines:
           deployStep: S_PS_HBGRoleSwitch_5978_0002_1
         execution:
           onSuccess:
-            - kubectl get service ${live_name}-${run_id}
-          onFailure:
-            - "Set-Alias -Name helm3 -Value \"$env:HELM3_PATH\" -Scope Global"
-            - helm3 delete ${blue_release_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - helm3 delete ${green_release_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - kubectl delete service ${idle_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - kubectl delete service ${live_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
+            - kubectl get service ${live_name}-${run_unique_id}
 
       - name: S_PS_HBGRoleSwitch_5978_0002_3
         type: HelmBlueGreenDeploy
@@ -77,24 +69,19 @@ pipelines:
             - name: S_PS_HBGRoleSwitch_5978_0002_git_resource
           chartPath: tests/core/helmbluegreen/simplehelm
           namespace: ${k8s_namespace}
-          blueReleaseName: ${blue_release_name}-${run_id}
-          greenReleaseName: ${green_release_name}-${run_id}
+          blueReleaseName: ${blue_release_name}-${run_unique_id}
+          greenReleaseName: ${green_release_name}-${run_unique_id}
           roleServices:
-            - blueReferenceName: ${blue_release_name}-${run_id}-simplehelm
-              greenReferenceName: ${green_release_name}-${run_id}-simplehelm
-              idleName: ${idle_name}-${run_id}
-              liveName: ${live_name}-${run_id}
+            - blueReferenceName: ${blue_release_name}-${run_unique_id}-simplehelm
+              greenReferenceName: ${green_release_name}-${run_unique_id}-simplehelm
+              idleName: ${idle_name}-${run_unique_id}
+              liveName: ${live_name}-${run_unique_id}
         execution:
           onSuccess:
-            - helm3 status ${blue_release_name}-${run_id}
-            - helm3 status ${green_release_name}-${run_id}
-            - kubectl get service ${idle_name}-${run_id}
-            - kubectl get service ${live_name}-${run_id}
-          onFailure:
-            - helm3 delete ${blue_release_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - helm3 delete ${green_release_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - kubectl delete service ${idle_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - kubectl delete service ${live_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
+            - helm3 status ${blue_release_name}-${run_unique_id}
+            - helm3 status ${green_release_name}-${run_unique_id}
+            - kubectl get service ${idle_name}-${run_unique_id}
+            - kubectl get service ${live_name}-${run_unique_id}
 
       - name: S_PS_HBGRoleSwitch_5978_0002_4
         type: HelmBlueGreenRoleSwitch
@@ -107,13 +94,8 @@ pipelines:
         execution:
           onSuccess:
             - "Set-Alias -Name helm3 -Value \"$env:HELM3_PATH\" -Scope Global"
-            - helm3 status ${blue_release_name}-${run_id}
-            - helm3 status ${green_release_name}-${run_id}
-            - kubectl get service ${idle_name}-${run_id}
-            - kubectl get service ${live_name}-${run_id}
-          onComplete:
-            - "Set-Alias -Name helm3 -Value \"$env:HELM3_PATH\" -Scope Global"
-            - helm3 delete ${blue_release_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - helm3 delete ${green_release_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - kubectl delete service ${idle_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
-            - kubectl delete service ${live_name}-${run_id} --namespace ${k8s_namespace}; $global:LASTEXITCODE = 0
+            - helm3 status ${blue_release_name}-${run_unique_id}
+            - helm3 status ${green_release_name}-${run_unique_id}
+            - kubectl get service ${idle_name}-${run_unique_id}
+            - kubectl get service ${live_name}-${run_unique_id}
+
